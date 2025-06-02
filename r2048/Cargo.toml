@@ -1,0 +1,12 @@
+[package]
+name = "r2048"
+version = "0.1.0"
+description = "2048 in rust"
+authors = ["Asaftei Rares <rares-stefan.asaftei@student.tuiasi.ro>"]
+license = "MIT"
+edition = "2024"
+
+[dependencies]
+crossterm = "0.28.1"
+ratatui = "0.29.0"
+color-eyre = "0.6.3"
