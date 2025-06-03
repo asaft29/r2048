@@ -1,28 +1,42 @@
 use crate::event::{AppEvent, Event, EventHandler};
+use crossterm::event::{poll, read};
+use rand::seq::IteratorRandom;
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
     prelude::*,
     widgets::*,
 };
-
+use std::time::Duration;
 /// Application.
 #[derive(Debug)]
 pub struct App {
     /// Is the application running?
     pub running: bool,
-    /// Counter.
-    pub counter: u8,
+
+    pub state: State,
+
+    pub selected_button: usize,
+
+    pub board: [[u32; 4]; 4],
 
     /// Event handler.
     pub events: EventHandler,
+}
+#[derive(Debug)]
+pub enum State {
+    Menu,
+    Playing,
+    Done,
 }
 
 impl Default for App {
     fn default() -> Self {
         Self {
             running: true,
-            counter: 0,
+            state: State::Menu,
+            selected_button: 0,
+            board: [[0; 4]; 4],
             events: EventHandler::new(),
         }
     }
@@ -34,11 +48,24 @@ impl App {
         Self::default()
     }
 
+    pub fn init_board(&mut self) {
+        let mut rng = rand::rng();
+
+        let empty_positions: Vec<(usize, usize)> = (0..4)
+            .flat_map(|row| (0..4).map(move |col| (row, col)))
+            .collect();
+
+        for &(row, col) in empty_positions.iter().choose_multiple(&mut rng, 2).iter() {
+            self.board[*row][*col] = 2;
+        }
+    }
+
     /// Run the application's main loop.
     pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
         while self.running {
             terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
             self.handle_events()?;
+            //println!("Current state : {:?}", self.state);
         }
         Ok(())
     }
@@ -51,10 +78,7 @@ impl App {
                 _ => {}
             },
             Event::App(app_event) => match app_event {
-                AppEvent::Increment => self.increment_counter(),
-                AppEvent::Decrement => self.decrement_counter(),
                 AppEvent::Quit => self.quit(),
- 
             },
         }
         Ok(())
@@ -62,15 +86,43 @@ impl App {
 
     /// Handles the key events and updates the state of [`App`].
     pub fn handle_key_event(&mut self, key_event: KeyEvent) -> color_eyre::Result<()> {
-        match key_event.code {
-            KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
-            KeyCode::Char('c' | 'C') if key_event.modifiers == KeyModifiers::CONTROL => {
-                self.events.send(AppEvent::Quit)
+        match self.state {
+            State::Menu => match key_event.code {
+                KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
+                KeyCode::Char('c') if key_event.modifiers == KeyModifiers::CONTROL => {
+                    self.events.send(AppEvent::Quit)
+                }
+                KeyCode::Left | KeyCode::Char('h') => {
+                    if self.selected_button > 0 {
+                        self.selected_button -= 1;
+                    }
+                }
+                KeyCode::Right | KeyCode::Char('l') => {
+                    if self.selected_button < 1 {
+                        self.selected_button += 1;
+                    }
+                }
+
+                KeyCode::Char('e') | KeyCode::Char('E') => match self.selected_button {
+                    0 => {
+                        self.state = State::Playing;
+                        self.init_board();
+                    }
+                    1 => self.events.send(AppEvent::Quit),
+                    _ => {}
+                },
+                _ => {}
+            },
+            _ => {
+                // For other states, handle quit keys
+                match key_event.code {
+                    KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
+                    KeyCode::Char('c') if key_event.modifiers == KeyModifiers::CONTROL => {
+                        self.events.send(AppEvent::Quit)
+                    }
+                    _ => {}
+                }
             }
-            KeyCode::Right => self.events.send(AppEvent::Increment),
-            KeyCode::Left => self.events.send(AppEvent::Decrement),
-            // Other handlers you could add here.
-            _ => {}
         }
         Ok(())
     }
@@ -85,14 +137,4 @@ impl App {
     pub fn quit(&mut self) {
         self.running = false;
     }
-
-    pub fn increment_counter(&mut self) {
-        self.counter = self.counter.saturating_add(1);
-    }
-
-    pub fn decrement_counter(&mut self) {
-        self.counter = self.counter.saturating_sub(1);
-    }
-
-
 }
