@@ -1,14 +1,10 @@
 use crate::events::event::{AppEvent, Event, EventHandler};
-use crate::tui::ui::*;
-use crossterm::event::{KeyEventKind, poll, read};
-use crossterm::terminal;
+use crossterm::event::KeyEventKind;
 use rand::seq::IteratorRandom;
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
 };
-use std::collections::HashSet;
-use std::hash::Hash;
 /// Application.
 #[derive(Debug)]
 pub struct App {
@@ -23,8 +19,6 @@ pub struct App {
 
     /// Event handler.
     pub events: EventHandler,
-
-    pub needs_redraw : bool,
 }
 #[derive(Debug)]
 pub enum State {
@@ -41,7 +35,6 @@ impl Default for App {
             selected_button: 0,
             board: [[0; 4]; 4],
             events: EventHandler::new(),
-            needs_redraw : false,
         }
     }
 }
@@ -52,7 +45,7 @@ impl App {
         Self::default()
     }
 
-    pub fn init_board(&mut self) {
+    fn init_board(&mut self) {
         let mut rng = rand::rng();
 
         let empty_positions: Vec<(usize, usize)> = (0..4)
@@ -63,7 +56,7 @@ impl App {
             self.board[*row][*col] = 2;
         }
     }
-    pub fn move_all_down(&mut self) {
+    fn move_all_down(&mut self) {
         for i in 0..self.board.len() {
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = 0;
@@ -86,17 +79,83 @@ impl App {
         }
     }
 
-    /// Run the application's main loop.
-pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
-    while self.running {
-        self.handle_events()?;
-
-        terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
+    fn move_all_up(&mut self) {
+        for i in 0..self.board.len() {
+            let mut stack: Vec<(u32, usize)> = Vec::new();
+            let mut j = self.board[0].len() - 1;
+            while j > 0 {
+                stack.push((self.board[j][i], j));
+                j -= 1;
+            }
+            while let Some(value) = stack.pop() {
+                let mut index = value.1;
+                while index > 0 {
+                    if self.board[index - 1][i] == 0 {
+                        self.board[index - 1][i] = self.board[index][i];
+                        self.board[index][i] = 0;
+                        index -= 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
     }
-    Ok(())
-}
+    fn move_all_right(&mut self) {
+        for i in 0..self.board.len() {
+            let mut stack: Vec<(u32, usize)> = Vec::new();
+            let mut j = 0;
+            while j < self.board[0].len() {
+                stack.push((self.board[i][j], j));
+                j += 1;
+            }
+            while let Some(value) = stack.pop() {
+                let mut index = value.1;
+                while index + 1 < j {
+                    if self.board[i][index + 1] == 0 {
+                        self.board[i][index + 1] = self.board[i][index];
+                        self.board[i][index] = 0;
+                        index += 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
+        fn move_all_left(&mut self) {
+        for i in 0..self.board.len() {
+            let mut stack: Vec<(u32, usize)> = Vec::new();
+            let mut j = self.board[0].len() - 1;
+            while j > 0 {
+                stack.push((self.board[i][j], j));
+                j -= 1;
+            }
+            while let Some(value) = stack.pop() {
+                let mut index = value.1;
+                while index > 0 {
+                    if self.board[i][index - 1] == 0 {
+                        self.board[i][index - 1] = self.board[i][index];
+                        self.board[i][index] = 0;
+                        index -= 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
+    /// Run the application's main loop.
+    pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
+        while self.running {
+            self.handle_events()?;
+
+            terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
+        }
+        Ok(())
+    }
 
     pub fn handle_events(&mut self) -> color_eyre::Result<()> {
         match self.events.next()? {
@@ -146,10 +205,10 @@ pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
                 _ => {}
             },
             State::Playing => match key_event.code {
-                KeyCode::Down => {
-                    self.move_all_down();
-                    self.needs_redraw = true;
-                }
+                KeyCode::Down => self.move_all_down(),
+                KeyCode::Up => self.move_all_up(),
+                KeyCode::Right => self.move_all_right(),
+                KeyCode::Left => self.move_all_left(), 
                 KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
                 _ => {}
             },

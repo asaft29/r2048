@@ -6,8 +6,13 @@ authors = ["Asaftei Rares <rares-stefan.asaftei@student.tuiasi.ro>"]
 license = "MIT"
 edition = "2024"
 
+[lib]
+name = "r2048"
+path = "src/lib.rs"
+
 [dependencies]
 crossterm = "0.28.1"
 ratatui = "0.29.0"
 color-eyre = "0.6.3"
 rand = "0.9.1"
+figlet-rs = "0.1.5"

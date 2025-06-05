@@ -1,9 +1,9 @@
+use figlet_rs::FIGfont;
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
     prelude::*,
-    style::{Color, Stylize},
-    text::Text,
+    style::Color,
     widgets::*,
     widgets::{Block, BorderType, Paragraph, Widget},
 };
@@ -84,7 +84,7 @@ impl Widget for &App {
                 let game_block = Block::default()
                     .title("Game")
                     .borders(Borders::ALL)
-                    .style(Style::default().bg(Color::Black)); 
+                    .style(Style::default().bg(Color::Black));
 
                 let inner_area = game_block.inner(area);
                 game_block.render(area, buf);
@@ -94,33 +94,59 @@ impl Widget for &App {
 
                 for row in 0..4 {
                     for col in 0..4 {
+                        let width = if col == 3 {
+                            inner_area.width - cell_width * 3
+                        } else {
+                            cell_width
+                        };
+
+                        let height = if row == 3 {
+                            inner_area.height - cell_height * 3
+                        } else {
+                            cell_height
+                        };
+
                         let x = inner_area.x + col * cell_width;
                         let y = inner_area.y + row * cell_height;
-
-                        let value = self.board[row as usize][col as usize];
 
                         let cell_area = Rect {
                             x,
                             y,
-                            width: cell_width,
-                            height: cell_height,
+                            width,
+                            height,
+                        };
+
+                        let value = self.board[row as usize][col as usize];
+
+                        let bg_color = if value != 0 {
+                            r2048::decoration::get_background_color(value)
+                        } else {
+                            Color::Black
                         };
 
                         Block::default()
                             .borders(Borders::ALL)
-                            .style(Style::default().bg(Color::Black))
+                            .style(Style::default().bg(bg_color))
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let content = vec![Line::from(Span::styled(
-                                value.to_string(),
-                                Style::default()
-                                    .add_modifier(Modifier::BOLD)
-                                    .fg(get_number_color(value))
-                                    .bg(Color::Black),
-                            ))];
+                            let standard_font = FIGfont::from_file("src/fonts/3d.flf").unwrap();
+                            let figure = standard_font.convert(&value.to_string()).unwrap();
 
-                            let content_height = content.len() as u16;
+                            let ascii_lines: Vec<Line> = figure
+                                .to_string()
+                                .lines()
+                                .map(|line| {
+                                    Line::from(Span::styled(
+                                        line.to_string(),
+                                        Style::default()
+                                            .add_modifier(Modifier::BOLD)
+                                            .fg(r2048::decoration::get_number_color(value)),
+                                    ))
+                                })
+                                .collect();
+
+                            let content_height = ascii_lines.len() as u16;
                             let inner_height = cell_area.height.saturating_sub(2);
                             let top_padding = if inner_height > content_height {
                                 (inner_height - content_height) / 2
@@ -129,18 +155,17 @@ impl Widget for &App {
                             };
 
                             let mut padded_content = Vec::new();
-
                             for _ in 0..top_padding {
                                 padded_content.push(Line::from(""));
                             }
-                            padded_content.extend(content);
+                            padded_content.extend(ascii_lines);
                             while padded_content.len() < inner_height as usize {
                                 padded_content.push(Line::from(""));
                             }
 
                             Paragraph::new(padded_content)
                                 .alignment(Alignment::Center)
-                                .style(Style::default().bg(Color::Black))
+                                .style(Style::default().bg(bg_color)) 
                                 .render(
                                     Rect {
                                         x: cell_area.x + 1,
@@ -162,22 +187,5 @@ impl Widget for &App {
                     .render(area, buf);
             }
         }
-    }
-}
-
-fn get_number_color(value: u32) -> Color {
-    match value {
-        2 => Color::Yellow,
-        4 => Color::LightYellow,
-        8 => Color::LightRed,
-        16 => Color::Red,
-        32 => Color::LightMagenta,
-        64 => Color::Magenta,
-        128 => Color::LightCyan,
-        256 => Color::Cyan,
-        512 => Color::LightBlue,
-        1024 => Color::Blue,
-        2048 => Color::Green,
-        _ => Color::Gray,
     }
 }
