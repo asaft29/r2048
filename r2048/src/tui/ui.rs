@@ -8,7 +8,7 @@ use ratatui::{
     widgets::{Block, BorderType, Paragraph, Widget},
 };
 
-use crate::app::{App, State};
+use crate::events::app::{App, State};
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         match self.state {
@@ -81,7 +81,11 @@ impl Widget for &App {
             }
 
             State::Playing => {
-                let game_block = Block::default().title("Game").borders(Borders::ALL);
+                let game_block = Block::default()
+                    .title("Game")
+                    .borders(Borders::ALL)
+                    .style(Style::default().bg(Color::Black)); 
+
                 let inner_area = game_block.inner(area);
                 game_block.render(area, buf);
 
@@ -94,22 +98,6 @@ impl Widget for &App {
                         let y = inner_area.y + row * cell_height;
 
                         let value = self.board[row as usize][col as usize];
-                        let content = if value == 0 {
-                            vec![Line::from("")]
-                        } else {
-                            let big_digit = get_big_digit(value);
-                            big_digit
-                                .into_iter()
-                                .map(|line| {
-                                    Line::from(Span::styled(
-                                        line,
-                                        Style::default()
-                                            .add_modifier(Modifier::BOLD)
-                                            .fg(get_number_color(value)),
-                                    ))
-                                })
-                                .collect()
-                        };
 
                         let cell_area = Rect {
                             x,
@@ -118,10 +106,51 @@ impl Widget for &App {
                             height: cell_height,
                         };
 
-                        Paragraph::new(content)
-                            .block(Block::default().borders(Borders::ALL))
-                            .alignment(Alignment::Center)
+                        Block::default()
+                            .borders(Borders::ALL)
+                            .style(Style::default().bg(Color::Black))
                             .render(cell_area, buf);
+
+                        if value != 0 {
+                            let content = vec![Line::from(Span::styled(
+                                value.to_string(),
+                                Style::default()
+                                    .add_modifier(Modifier::BOLD)
+                                    .fg(get_number_color(value))
+                                    .bg(Color::Black),
+                            ))];
+
+                            let content_height = content.len() as u16;
+                            let inner_height = cell_area.height.saturating_sub(2);
+                            let top_padding = if inner_height > content_height {
+                                (inner_height - content_height) / 2
+                            } else {
+                                0
+                            };
+
+                            let mut padded_content = Vec::new();
+
+                            for _ in 0..top_padding {
+                                padded_content.push(Line::from(""));
+                            }
+                            padded_content.extend(content);
+                            while padded_content.len() < inner_height as usize {
+                                padded_content.push(Line::from(""));
+                            }
+
+                            Paragraph::new(padded_content)
+                                .alignment(Alignment::Center)
+                                .style(Style::default().bg(Color::Black))
+                                .render(
+                                    Rect {
+                                        x: cell_area.x + 1,
+                                        y: cell_area.y + 1,
+                                        width: cell_area.width.saturating_sub(2),
+                                        height: cell_area.height.saturating_sub(2),
+                                    },
+                                    buf,
+                                );
+                        }
                     }
                 }
             }
@@ -150,38 +179,5 @@ fn get_number_color(value: u32) -> Color {
         1024 => Color::Blue,
         2048 => Color::Green,
         _ => Color::Gray,
-    }
-}
-
-fn get_big_digit(value: u32) -> Vec<String> {
-    match value {
-        2 => vec![
-            " █████ ".to_string(),
-            "     █ ".to_string(),
-            " █████ ".to_string(),
-            " █     ".to_string(),
-            " █████ ".to_string(),
-        ],
-        4 => vec![
-            " █   █ ".to_string(),
-            " █   █ ".to_string(),
-            " █████ ".to_string(),
-            "     █ ".to_string(),
-            "     █ ".to_string(),
-        ],
-        8 => vec![
-            " █████ ".to_string(),
-            " █   █ ".to_string(),
-            " █████ ".to_string(),
-            " █   █ ".to_string(),
-            " █████ ".to_string(),
-        ],
-        _ => vec![
-            value.to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-        ],
     }
 }

@@ -1,13 +1,14 @@
-use crate::event::{AppEvent, Event, EventHandler};
-use crossterm::event::{poll, read};
+use crate::events::event::{AppEvent, Event, EventHandler};
+use crate::tui::ui::*;
+use crossterm::event::{KeyEventKind, poll, read};
+use crossterm::terminal;
 use rand::seq::IteratorRandom;
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
-    prelude::*,
-    widgets::*,
 };
-use std::time::Duration;
+use std::collections::HashSet;
+use std::hash::Hash;
 /// Application.
 #[derive(Debug)]
 pub struct App {
@@ -22,6 +23,8 @@ pub struct App {
 
     /// Event handler.
     pub events: EventHandler,
+
+    pub needs_redraw : bool,
 }
 #[derive(Debug)]
 pub enum State {
@@ -38,6 +41,7 @@ impl Default for App {
             selected_button: 0,
             board: [[0; 4]; 4],
             events: EventHandler::new(),
+            needs_redraw : false,
         }
     }
 }
@@ -59,16 +63,40 @@ impl App {
             self.board[*row][*col] = 2;
         }
     }
+    pub fn move_all_down(&mut self) {
+        for i in 0..self.board.len() {
+            let mut stack: Vec<(u32, usize)> = Vec::new();
+            let mut j = 0;
+            while j < self.board[0].len() {
+                stack.push((self.board[j][i], j));
+                j += 1;
+            }
+            while let Some(value) = stack.pop() {
+                let mut index = value.1;
+                while index + 1 < j {
+                    if self.board[index + 1][i] == 0 {
+                        self.board[index + 1][i] = self.board[index][i];
+                        self.board[index][i] = 0;
+                        index += 1;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     /// Run the application's main loop.
-    pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
-        while self.running {
-            terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
-            self.handle_events()?;
-            //println!("Current state : {:?}", self.state);
-        }
-        Ok(())
+pub fn run(mut self, mut terminal: DefaultTerminal) -> color_eyre::Result<()> {
+    while self.running {
+        self.handle_events()?;
+
+        terminal.draw(|frame| frame.render_widget(&self, frame.area()))?;
     }
+    Ok(())
+}
+
+
 
     pub fn handle_events(&mut self) -> color_eyre::Result<()> {
         match self.events.next()? {
@@ -86,6 +114,10 @@ impl App {
 
     /// Handles the key events and updates the state of [`App`].
     pub fn handle_key_event(&mut self, key_event: KeyEvent) -> color_eyre::Result<()> {
+        if key_event.kind != KeyEventKind::Press {
+            return Ok(());
+        }
+
         match self.state {
             State::Menu => match key_event.code {
                 KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
@@ -111,6 +143,14 @@ impl App {
                     1 => self.events.send(AppEvent::Quit),
                     _ => {}
                 },
+                _ => {}
+            },
+            State::Playing => match key_event.code {
+                KeyCode::Down => {
+                    self.move_all_down();
+                    self.needs_redraw = true;
+                }
+                KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
                 _ => {}
             },
             _ => {
