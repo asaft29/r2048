@@ -82,9 +82,10 @@ impl Widget for &App {
 
             State::Playing => {
                 let game_block = Block::default()
-                    .title("Game")
+                    .title("r2048")
                     .borders(Borders::ALL)
-                    .style(Style::default().bg(Color::Black));
+                    .style(Style::default().bg(Color::Black))
+                    .title_alignment(Alignment::Center);
 
                 let inner_area = game_block.inner(area);
                 game_block.render(area, buf);
@@ -130,7 +131,8 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let standard_font = FIGfont::from_file("src/fonts/3d.flf").unwrap();
+                            let standard_font =
+                                FIGfont::from_file("src/fonts/3d.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
@@ -141,7 +143,7 @@ impl Widget for &App {
                                         line.to_string(),
                                         Style::default()
                                             .add_modifier(Modifier::BOLD)
-                                            .fg(r2048::decoration::get_number_color(value)),
+                                            .fg(Color::Black),
                                     ))
                                 })
                                 .collect();
@@ -165,7 +167,7 @@ impl Widget for &App {
 
                             Paragraph::new(padded_content)
                                 .alignment(Alignment::Center)
-                                .style(Style::default().bg(bg_color)) 
+                                .style(Style::default().bg(bg_color))
                                 .render(
                                     Rect {
                                         x: cell_area.x + 1,

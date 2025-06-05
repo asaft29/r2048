@@ -67,12 +67,22 @@ impl App {
             while let Some(value) = stack.pop() {
                 let mut index = value.1;
                 while index + 1 < j {
-                    if self.board[index + 1][i] == 0 {
-                        self.board[index + 1][i] = self.board[index][i];
-                        self.board[index][i] = 0;
-                        index += 1;
-                    } else {
-                        break;
+                    let val: u32 = self.board[index][i];
+
+                    match self.board[index + 1][i] {
+                        0 => {
+                            self.board[index + 1][i] = val;
+                            self.board[index][i] = 0;
+                            index += 1;
+                        }
+
+                        other if other == val => {
+                            self.board[index + 1][i] += other;
+                            self.board[index][i] = 0;
+                            index += 1;
+                        }
+
+                        _ => break,
                     }
                 }
             }
@@ -90,12 +100,21 @@ impl App {
             while let Some(value) = stack.pop() {
                 let mut index = value.1;
                 while index > 0 {
-                    if self.board[index - 1][i] == 0 {
-                        self.board[index - 1][i] = self.board[index][i];
-                        self.board[index][i] = 0;
-                        index -= 1;
-                    } else {
-                        break;
+                    let val: u32 = self.board[index][i];
+                    match self.board[index - 1][i] {
+                        0 => {
+                            self.board[index - 1][i] = val;
+                            self.board[index][i] = 0;
+                            index -= 1;
+                        }
+
+                        other if other == val => {
+                            self.board[index - 1][i] += other;
+                            self.board[index][i] = 0;
+                            index -= 1;
+                        }
+
+                        _ => break,
                     }
                 }
             }
@@ -112,19 +131,28 @@ impl App {
             while let Some(value) = stack.pop() {
                 let mut index = value.1;
                 while index + 1 < j {
-                    if self.board[i][index + 1] == 0 {
-                        self.board[i][index + 1] = self.board[i][index];
-                        self.board[i][index] = 0;
-                        index += 1;
-                    } else {
-                        break;
+                    let val = self.board[i][index];
+
+                    match self.board[i][index + 1] {
+                        0 => {
+                            self.board[i][index + 1] = val;
+                            self.board[i][index] = 0;
+                            index += 1;
+                        }
+                        other if other == val => {
+                            self.board[i][index + 1] += other;
+                            self.board[i][index] = 0;
+                            index += 1;
+                        }
+
+                        _ => break,
                     }
                 }
             }
         }
     }
 
-        fn move_all_left(&mut self) {
+    fn move_all_left(&mut self) {
         for i in 0..self.board.len() {
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = self.board[0].len() - 1;
@@ -135,15 +163,44 @@ impl App {
             while let Some(value) = stack.pop() {
                 let mut index = value.1;
                 while index > 0 {
-                    if self.board[i][index - 1] == 0 {
-                        self.board[i][index - 1] = self.board[i][index];
-                        self.board[i][index] = 0;
-                        index -= 1;
-                    } else {
-                        break;
+                    let val = self.board[i][index];
+
+                    match self.board[i][index - 1] {
+                        0 => {
+                            self.board[i][index - 1] = val;
+                            self.board[i][index] = 0;
+                            index -= 1;
+                        }
+                        other if other == val => {
+                            self.board[i][index - 1] += other;
+                            self.board[i][index] = 0;
+                            index -= 1;
+                        }
+
+                        _ => break,
                     }
                 }
             }
+        }
+    }
+    fn spawn_one_random(&mut self)
+    {
+        let mut rng = rand::rng();
+        let mut empty_cells = Vec::new();
+
+        // Collect all empty positions (value == 0)
+        for row in 0..4 {
+            for col in 0..4 {
+                if self.board[row][col] == 0 {
+                    empty_cells.push((row, col));
+                }
+            }
+        }
+
+        // Pick a random empty cell and place a 2 or 4
+        if let Some((row, col)) = empty_cells.into_iter().choose(&mut rng) {
+            let value = if rand::random::<f32>() < 0.9 { 2 } else { 4 }; // 90% chance of 2
+            self.board[row][col] = value;
         }
     }
 
@@ -205,10 +262,10 @@ impl App {
                 _ => {}
             },
             State::Playing => match key_event.code {
-                KeyCode::Down => self.move_all_down(),
-                KeyCode::Up => self.move_all_up(),
-                KeyCode::Right => self.move_all_right(),
-                KeyCode::Left => self.move_all_left(), 
+                KeyCode::Down => { self.move_all_down(); self.spawn_one_random(); }
+                KeyCode::Up => { self.move_all_up(); self.spawn_one_random(); }
+                KeyCode::Right => { self.move_all_right(); self.spawn_one_random(); }
+                KeyCode::Left => { self.move_all_left(); self.spawn_one_random(); }
                 KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
                 _ => {}
             },

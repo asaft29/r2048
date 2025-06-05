@@ -3,23 +3,6 @@ use ratatui::style::Color;
 pub mod decoration {
     use super::*;
 
-    pub fn get_number_color(value: u32) -> Color {
-        match value {
-            2 => Color::Black,
-            4 => Color::LightYellow,
-            8 => Color::LightRed,
-            16 => Color::Red,
-            32 => Color::Magenta,
-            64 => Color::LightMagenta,
-            128 => Color::LightBlue,
-            256 => Color::Blue,
-            512 => Color::Cyan,
-            1024 => Color::LightCyan,
-            2048 => Color::Green,
-            _ => Color::Gray,
-        }
-    }
-
     pub fn get_background_color(value: u32) -> Color {
         match value {
             2 => Color::Rgb(238, 228, 218),
