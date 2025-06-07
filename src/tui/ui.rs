@@ -1,3 +1,4 @@
+use crate::events::app::App;
 use figlet_rs::FIGfont;
 use ratatui::{
     buffer::Buffer,
@@ -7,8 +8,9 @@ use ratatui::{
     widgets::*,
     widgets::{Block, BorderType, Paragraph, Widget},
 };
+use r2048::game_logic::State;
 
-use crate::events::app::{App, State};
+
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         match self.state {
@@ -117,7 +119,7 @@ impl Widget for &App {
                             height,
                         };
 
-                        let value = self.board[row as usize][col as usize];
+                        let value = self.board.size[row as usize][col as usize];
 
                         let bg_color = if value != 0 {
                             r2048::decoration::get_background_color(value)
@@ -131,8 +133,7 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let standard_font =
-                                FIGfont::from_file("src/fonts/3d.flf").unwrap();
+                            let standard_font = FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure

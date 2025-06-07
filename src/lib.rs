@@ -1,7 +1,6 @@
-use ratatui::style::Color;
-
 pub mod decoration {
-    use super::*;
+
+    use ratatui::style::Color;
 
     pub fn get_background_color(value: u32) -> Color {
         match value {
@@ -17,6 +16,192 @@ pub mod decoration {
             1024 => Color::Rgb(237, 197, 63),
             2048 => Color::Rgb(237, 194, 46),
             _ => Color::Black,
+        }
+    }
+}
+pub mod game_logic {
+    use rand::seq::IteratorRandom;
+
+    #[derive(Debug)]
+    pub struct Board {
+        pub size: [[u32; 4]; 4],
+    }
+
+    #[derive(Debug)]
+    pub enum State {
+        Menu,
+
+        Playing,
+
+        Done,
+    }
+
+    impl Board {
+        pub fn new() -> Self {
+            Self { size: [[0; 4]; 4] }
+        }
+
+        pub fn clear(&mut self) {
+            self.size.iter_mut()
+                     .flat_map(|r| r.iter_mut())
+                     .for_each(|x| *x = 0);
+        }
+        pub fn init_board(&mut self) {
+            self.clear();
+
+            let mut rng = rand::rng();
+
+            let empty_positions: Vec<(usize, usize)> = (0..4)
+                .flat_map(|row| (0..4).map(move |col| (row, col)))
+                .collect();
+
+            for &(row, col) in empty_positions.iter().choose_multiple(&mut rng, 2).iter() {
+                self.size[*row][*col] = 2;
+            }
+        }
+        pub fn move_all_down(&mut self) {
+            for i in 0..self.size.len() {
+                let mut stack: Vec<(u32, usize)> = Vec::new();
+                let mut j = 0;
+                while j < self.size[0].len() {
+                    stack.push((self.size[j][i], j));
+                    j += 1;
+                }
+                while let Some(value) = stack.pop() {
+                    let mut index = value.1;
+                    while index + 1 < j {
+                        let val: u32 = self.size[index][i];
+
+                        match self.size[index + 1][i] {
+                            0 => {
+                                self.size[index + 1][i] = val;
+                                self.size[index][i] = 0;
+                                index += 1;
+                            }
+
+                            other if other == val => {
+                                self.size[index + 1][i] += other;
+                                self.size[index][i] = 0;
+                                break;
+                            }
+
+                            _ => break,
+                        }
+                    }
+                }
+            }
+        }
+
+        pub fn move_all_up(&mut self) {
+            for i in 0..self.size.len() {
+                let mut stack: Vec<(u32, usize)> = Vec::new();
+                let mut j = self.size[0].len() - 1;
+                while j > 0 {
+                    stack.push((self.size[j][i], j));
+                    j -= 1;
+                }
+                while let Some(value) = stack.pop() {
+                    let mut index = value.1;
+                    while index > 0 {
+                        let val: u32 = self.size[index][i];
+                        match self.size[index - 1][i] {
+                            0 => {
+                                self.size[index - 1][i] = val;
+                                self.size[index][i] = 0;
+                                index -= 1;
+                            }
+
+                            other if other == val => {
+                                self.size[index - 1][i] += other;
+                                self.size[index][i] = 0;
+                                break;
+                            }
+
+                            _ => break,
+                        }
+                    }
+                }
+            }
+        }
+        pub fn move_all_right(&mut self) {
+            for i in 0..self.size.len() {
+                let mut stack: Vec<(u32, usize)> = Vec::new();
+                let mut j = 0;
+                while j < self.size[0].len() {
+                    stack.push((self.size[i][j], j));
+                    j += 1;
+                }
+                while let Some(value) = stack.pop() {
+                    let mut index = value.1;
+                    while index + 1 < j {
+                        let val = self.size[i][index];
+
+                        match self.size[i][index + 1] {
+                            0 => {
+                                self.size[i][index + 1] = val;
+                                self.size[i][index] = 0;
+                                index += 1;
+                            }
+                            other if other == val => {
+                                self.size[i][index + 1] += other;
+                                self.size[i][index] = 0;
+                                break;
+                            }
+
+                            _ => break,
+                        }
+                    }
+                }
+            }
+        }
+
+        pub fn move_all_left(&mut self) {
+            for i in 0..self.size.len() {
+                let mut stack: Vec<(u32, usize)> = Vec::new();
+                let mut j = self.size[0].len() - 1;
+                while j > 0 {
+                    stack.push((self.size[i][j], j));
+                    j -= 1;
+                }
+                while let Some(value) = stack.pop() {
+                    let mut index = value.1;
+                    while index > 0 {
+                        let val = self.size[i][index];
+
+                        match self.size[i][index - 1] {
+                            0 => {
+                                self.size[i][index - 1] = val;
+                                self.size[i][index] = 0;
+                                index -= 1;
+                            }
+                            other if other == val => {
+                                self.size[i][index - 1] += other;
+                                self.size[i][index] = 0;
+                                break;
+                            }
+
+                            _ => break,
+                        }
+                    }
+                }
+            }
+        }
+        pub fn spawn_one_random(&mut self) {
+            let mut rng = rand::rng();
+            let mut empty_cells = Vec::new();
+
+            for row in 0..4 {
+                for col in 0..4 {
+                    if self.size[row][col] == 0 {
+                        empty_cells.push((row, col));
+                    }
+                }
+            }
+
+            if let Some((row, col)) = empty_cells.into_iter().choose(&mut rng) {
+                let value = if rand::random::<f32>() < 0.9 { 2 } else { 4 };
+                self.size[row][col] = value;
+            }
         }
     }
 }
