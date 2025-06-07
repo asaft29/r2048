@@ -1,5 +1,6 @@
 use crate::events::app::App;
 use figlet_rs::FIGfont;
+use r2048::game_logic::State;
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -8,8 +9,6 @@ use ratatui::{
     widgets::*,
     widgets::{Block, BorderType, Paragraph, Widget},
 };
-use r2048::game_logic::State;
-
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -133,7 +132,8 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let standard_font = FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
+                            let standard_font =
+                                FIGfont::from_file("fonts/Graceful.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
@@ -183,11 +183,159 @@ impl Widget for &App {
                 }
             }
 
-            State::Done => {
-                Paragraph::new("Thanks for playing!")
-                    .block(Block::default().title("Done").borders(Borders::ALL))
-                    .alignment(ratatui::layout::Alignment::Center)
-                    .render(area, buf);
+            State::Won => {
+                Clear.render(area, buf);
+
+                let vertical_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([
+                        Constraint::Percentage(40),
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(40),
+                    ])
+                    .split(area);
+
+                let horizontal_chunks = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(60),
+                        Constraint::Percentage(20),
+                    ])
+                    .split(vertical_chunks[1]);
+
+                let popup_area = horizontal_chunks[1];
+
+                let popup_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([
+                        Constraint::Length(5), 
+                        Constraint::Length(3), 
+                    ])
+                    .split(popup_area);
+
+                let block = Block::default()
+                    .title("You won!")
+                    .borders(Borders::ALL)
+                    .style(Style::default().fg(Color::Green).bg(Color::Black))
+                    .border_type(ratatui::widgets::BorderType::Double)
+                    .title_alignment(Alignment::Center);
+
+                 let score_text = format!(
+                    "You got 2048 on the board - you won!\nSCORE: {}",
+                    self.board.calculate_score()
+                );
+
+                let paragraph = Paragraph::new(score_text)
+                    .block(block)
+                    .alignment(Alignment::Center)
+                    .style(Style::default().fg(Color::White).bg(Color::Black))
+                    .wrap(ratatui::widgets::Wrap { trim: true });
+
+                paragraph.render(popup_chunks[0], buf);
+
+                let buttons = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+                    .split(popup_chunks[1]);
+
+                let labels = ["One more time?", "Quit"];
+
+                for (i, label) in labels.iter().enumerate() {
+                    let style = if self.selected_button == i {
+                        Style::default()
+                            .bg(Color::Green)
+                            .fg(Color::Black)
+                            .add_modifier(Modifier::BOLD)
+                    } else {
+                        Style::default()
+                    };
+
+                    let button = Paragraph::new(*label)
+                        .block(Block::default().borders(Borders::ALL))
+                        .style(style)
+                        .alignment(Alignment::Center);
+
+                    button.render(buttons[i], buf);
+                }
+            }
+
+            State::Lost => {
+                Clear.render(area, buf);
+
+                let vertical_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([
+                        Constraint::Percentage(40),
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(40),
+                    ])
+                    .split(area);
+
+                let horizontal_chunks = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(60),
+                        Constraint::Percentage(20),
+                    ])
+                    .split(vertical_chunks[1]);
+
+                let popup_area = horizontal_chunks[1];
+
+                let popup_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([
+                        Constraint::Length(5), 
+                        Constraint::Length(3), 
+                    ])
+                    .split(popup_area);
+
+                let block = Block::default()
+                    .title("Game Over")
+                    .borders(Borders::ALL)
+                    .style(Style::default().fg(Color::Red).bg(Color::Black))
+                    .border_type(ratatui::widgets::BorderType::Double)
+                    .title_alignment(Alignment::Center);
+
+
+                let score_text = format!(
+                    "No more possible moves, you were so close!\nSCORE: {}",
+                    self.board.calculate_score()
+                );
+
+                let paragraph = Paragraph::new(score_text)
+                    .block(block)
+                    .alignment(Alignment::Center)
+                    .style(Style::default().fg(Color::White).bg(Color::Black))
+                    .wrap(ratatui::widgets::Wrap { trim: true });
+
+                paragraph.render(popup_chunks[0], buf);
+
+                let buttons = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+                    .split(popup_chunks[1]);
+
+                let labels = ["Maybe try again?", "Quit"];
+
+                for (i, label) in labels.iter().enumerate() {
+                    let style = if self.selected_button == i {
+                        Style::default()
+                            .bg(Color::Green)
+                            .fg(Color::Black)
+                            .add_modifier(Modifier::BOLD)
+                    } else {
+                        Style::default()
+                    };
+
+                    let button = Paragraph::new(*label)
+                        .block(Block::default().borders(Borders::ALL))
+                        .style(style)
+                        .alignment(Alignment::Center);
+
+                    button.render(buttons[i], buf);
+                }
             }
         }
     }

@@ -22,18 +22,15 @@ pub mod decoration {
 pub mod game_logic {
     use rand::seq::IteratorRandom;
 
-    #[derive(Debug)]
     pub struct Board {
         pub size: [[u32; 4]; 4],
     }
 
-    #[derive(Debug)]
     pub enum State {
         Menu,
-
         Playing,
-
-        Done,
+        Lost,
+        Won,
     }
 
     impl Board {
@@ -42,9 +39,10 @@ pub mod game_logic {
         }
 
         pub fn clear(&mut self) {
-            self.size.iter_mut()
-                     .flat_map(|r| r.iter_mut())
-                     .for_each(|x| *x = 0);
+            self.size
+                .iter_mut()
+                .flat_map(|r| r.iter_mut())
+                .for_each(|x| *x = 0);
         }
         pub fn init_board(&mut self) {
             self.clear();
@@ -202,6 +200,35 @@ pub mod game_logic {
                 let value = if rand::random::<f32>() < 0.9 { 2 } else { 4 };
                 self.size[row][col] = value;
             }
+        }
+        pub fn won(&self) -> bool {
+            self.size.iter().flatten().any(|&x| x == 2048)
+        }
+
+        pub fn lost(&self) -> bool {
+            let n = self.size.len();
+
+            if self.size.iter().flatten().any(|&x| x == 0) {
+                return false;
+            }
+
+            for i in 0..n {
+                for j in 0..n {
+                    let current = self.size[i][j];
+                    if j + 1 < n && self.size[i][j + 1] == current {
+                        return false;
+                    }
+                    if i + 1 < n && self.size[i + 1][j] == current {
+                        return false;
+                    }
+                }
+            }
+
+            true
+        }
+
+        pub fn calculate_score(&self) -> u32 {
+            self.size.iter().flatten().sum()
         }
     }
 }

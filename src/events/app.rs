@@ -2,7 +2,6 @@ use crate::events::event::{AppEvent, Event, EventHandler};
 
 use crossterm::event::KeyEventKind;
 
-
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
@@ -12,7 +11,6 @@ use r2048::game_logic::*;
 
 /// Application.
 
-#[derive(Debug)]
 
 pub struct App {
     /// Is the application running?
@@ -123,45 +121,104 @@ impl App {
                 _ => {}
             },
 
-            State::Playing => match key_event.code {
-                KeyCode::Down => {
-                    self.board.move_all_down();
+            State::Playing => {
+                let moved = match key_event.code {
+                    KeyCode::Down => {
+                        self.board.move_all_down();
+                        true
+                    }
+                    KeyCode::Up => {
+                        self.board.move_all_up();
+                        true
+                    }
+                    KeyCode::Right => {
+                        self.board.move_all_right();
+                        true
+                    }
+                    KeyCode::Left => {
+                        self.board.move_all_left();
+                        true
+                    }
+                    KeyCode::Esc | KeyCode::Char('q') => {
+                        self.state = State::Menu;
+                        false
+                    }
+                    _ => false,
+                };
+
+                if moved {
                     self.board.spawn_one_random();
+
+                    if self.board.won() {
+                        self.state = State::Won;
+                    } else if self.board.lost() {
+                        self.state = State::Lost;
+                    }
+                }
+            }
+            State::Won => match key_event.code {
+                KeyCode::Char('c') if key_event.modifiers == KeyModifiers::CONTROL => {
+                    self.events.send(AppEvent::Quit)
                 }
 
-                KeyCode::Up => {
-                    self.board.move_all_up();
-                    self.board.spawn_one_random();
+                KeyCode::Left | KeyCode::Char('h') => {
+                    if self.selected_button > 0 {
+                        self.selected_button -= 1;
+                    }
                 }
 
-                KeyCode::Right => {
-                    self.board.move_all_right();
-                    self.board.spawn_one_random();
+                KeyCode::Right | KeyCode::Char('l') => {
+                    if self.selected_button < 1 {
+                        self.selected_button += 1;
+                    }
                 }
 
-                KeyCode::Left => {
-                    self.board.move_all_left();
-                    self.board.spawn_one_random();
-                }
+                KeyCode::Char('e') | KeyCode::Char('E') => match self.selected_button {
+                    0 => {
+                        self.state = State::Playing;
 
-                KeyCode::Esc | KeyCode::Char('q') => self.state = State::Menu, 
+                        self.board.init_board();
+                    }
+
+                    1 => self.events.send(AppEvent::Quit),
+
+                    _ => {}
+                },
 
                 _ => {}
             },
 
-            _ => {
-                // For other states, handle quit keys
+            State::Lost => match key_event.code {
+                KeyCode::Char('c') if key_event.modifiers == KeyModifiers::CONTROL => {
+                    self.events.send(AppEvent::Quit)
+                }
 
-                match key_event.code {
-                    KeyCode::Esc | KeyCode::Char('q') => self.events.send(AppEvent::Quit),
+                KeyCode::Left | KeyCode::Char('h') => {
+                    if self.selected_button > 0 {
+                        self.selected_button -= 1;
+                    }
+                }
 
-                    KeyCode::Char('c') if key_event.modifiers == KeyModifiers::CONTROL => {
-                        self.events.send(AppEvent::Quit)
+                KeyCode::Right | KeyCode::Char('l') => {
+                    if self.selected_button < 1 {
+                        self.selected_button += 1;
+                    }
+                }
+
+                KeyCode::Char('e') | KeyCode::Char('E') => match self.selected_button {
+                    0 => {
+                        self.state = State::Playing;
+
+                        self.board.init_board();
                     }
 
+                    1 => self.events.send(AppEvent::Quit),
+
                     _ => {}
-                }
-            }
+                },
+
+                _ => {}
+            },
         }
 
         Ok(())
