@@ -133,7 +133,8 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let standard_font = FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
+                            let standard_font =
+                                FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
