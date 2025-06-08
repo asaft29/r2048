@@ -6,6 +6,7 @@ use ratatui::{
     layout::{Alignment, Constraint, Layout, Rect},
     prelude::*,
     style::Color,
+    text::{Line, Span},
     widgets::*,
     widgets::{Block, BorderType, Paragraph, Widget},
 };
@@ -132,8 +133,7 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let standard_font =
-                                FIGfont::from_file("fonts/Graceful.flf").unwrap();
+                            let standard_font = FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
@@ -189,8 +189,8 @@ impl Widget for &App {
                 let vertical_chunks = Layout::default()
                     .direction(Direction::Vertical)
                     .constraints([
-                        Constraint::Percentage(40),
-                        Constraint::Percentage(20),
+                        Constraint::Percentage(30),
+                        Constraint::Percentage(30),
                         Constraint::Percentage(40),
                     ])
                     .split(area);
@@ -208,10 +208,7 @@ impl Widget for &App {
 
                 let popup_chunks = Layout::default()
                     .direction(Direction::Vertical)
-                    .constraints([
-                        Constraint::Length(5), 
-                        Constraint::Length(3), 
-                    ])
+                    .constraints([Constraint::Length(4), Constraint::Length(3)])
                     .split(popup_area);
 
                 let block = Block::default()
@@ -221,15 +218,29 @@ impl Widget for &App {
                     .border_type(ratatui::widgets::BorderType::Double)
                     .title_alignment(Alignment::Center);
 
-                 let score_text = format!(
-                    "You got 2048 on the board - you won!\nSCORE: {}",
-                    self.board.calculate_score()
-                );
+                let score_value = self.board.calculate_score().to_string();
+                let lines = vec![
+                    Line::styled(
+                        "You got 2048 on the board",
+                        Style::default()
+                            .fg(Color::White)
+                            .add_modifier(Modifier::BOLD),
+                    ),
+                    Line::from(vec![
+                        Span::styled("SCORE : ", Style::default().fg(Color::White)),
+                        Span::styled(
+                            score_value,
+                            Style::default()
+                                .fg(Color::LightMagenta)
+                                .add_modifier(Modifier::BOLD),
+                        ),
+                    ]),
+                ];
 
-                let paragraph = Paragraph::new(score_text)
+                let paragraph = Paragraph::new(lines)
                     .block(block)
                     .alignment(Alignment::Center)
-                    .style(Style::default().fg(Color::White).bg(Color::Black))
+                    .style(Style::default().bg(Color::Black))
                     .wrap(ratatui::widgets::Wrap { trim: true });
 
                 paragraph.render(popup_chunks[0], buf);
@@ -259,15 +270,14 @@ impl Widget for &App {
                     button.render(buttons[i], buf);
                 }
             }
-
             State::Lost => {
                 Clear.render(area, buf);
 
                 let vertical_chunks = Layout::default()
                     .direction(Direction::Vertical)
                     .constraints([
-                        Constraint::Percentage(40),
-                        Constraint::Percentage(20),
+                        Constraint::Percentage(30),
+                        Constraint::Percentage(30),
                         Constraint::Percentage(40),
                     ])
                     .split(area);
@@ -285,10 +295,7 @@ impl Widget for &App {
 
                 let popup_chunks = Layout::default()
                     .direction(Direction::Vertical)
-                    .constraints([
-                        Constraint::Length(5), 
-                        Constraint::Length(3), 
-                    ])
+                    .constraints([Constraint::Length(4), Constraint::Length(3)])
                     .split(popup_area);
 
                 let block = Block::default()
@@ -298,16 +305,27 @@ impl Widget for &App {
                     .border_type(ratatui::widgets::BorderType::Double)
                     .title_alignment(Alignment::Center);
 
+                let score_value = self.board.calculate_score().to_string();
+                let lines = vec![
+                    Line::styled(
+                        "No more possible moves, you were so close!",
+                        Style::default().fg(Color::White),
+                    ),
+                    Line::from(vec![
+                        Span::styled("SCORE : ", Style::default().fg(Color::White)),
+                        Span::styled(
+                            score_value,
+                            Style::default()
+                                .fg(Color::LightMagenta)
+                                .add_modifier(Modifier::BOLD),
+                        ),
+                    ]),
+                ];
 
-                let score_text = format!(
-                    "No more possible moves, you were so close!\nSCORE: {}",
-                    self.board.calculate_score()
-                );
-
-                let paragraph = Paragraph::new(score_text)
+                let paragraph = Paragraph::new(lines)
                     .block(block)
                     .alignment(Alignment::Center)
-                    .style(Style::default().fg(Color::White).bg(Color::Black))
+                    .style(Style::default().bg(Color::Black))
                     .wrap(ratatui::widgets::Wrap { trim: true });
 
                 paragraph.render(popup_chunks[0], buf);

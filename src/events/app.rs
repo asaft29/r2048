@@ -11,7 +11,6 @@ use r2048::game_logic::*;
 
 /// Application.
 
-
 pub struct App {
     /// Is the application running?
     pub running: bool,
