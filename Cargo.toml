@@ -2,7 +2,7 @@
 name = "r2048"
 version = "0.1.0"
 description = "2048 in rust"
-authors = ["Asaftei Rares <rares-stefan.asaftei@student.tuiasi.ro>"]
+authors = ["Asaftei Rares"]
 license = "MIT"
 edition = "2024"
 
