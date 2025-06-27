@@ -48,6 +48,7 @@ impl Widget for &App {
                     .constraints([
                         Constraint::Length(2),
                         Constraint::Length(1),
+                        Constraint::Min(1),
                         Constraint::Length(3),
                     ])
                     .split(box_area);
@@ -57,10 +58,16 @@ impl Widget for &App {
                     .alignment(ratatui::layout::Alignment::Center);
                 title.render(inner_chunks[0], buf);
 
+                let highest_score_paragraph =
+                    Paragraph::new(format!("Highest Score: {}", self.board.high_score.get()))
+                        .style(Style::default().fg(Color::Yellow))
+                        .alignment(ratatui::layout::Alignment::Center);
+                highest_score_paragraph.render(inner_chunks[1], buf);
+
                 let button_chunks = Layout::default()
                     .direction(Direction::Horizontal)
                     .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
-                    .split(inner_chunks[2]);
+                    .split(inner_chunks[3]);
 
                 let labels = ["Start", "Quit"];
                 for (i, label) in labels.iter().enumerate() {
@@ -251,7 +258,7 @@ impl Widget for &App {
                     .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
                     .split(popup_chunks[1]);
 
-                let labels = ["One more time?", "Quit"];
+                let labels = ["One more time?", "Main Menu"];
 
                 for (i, label) in labels.iter().enumerate() {
                     let style = if self.selected_button == i {
@@ -336,7 +343,7 @@ impl Widget for &App {
                     .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
                     .split(popup_chunks[1]);
 
-                let labels = ["Maybe try again?", "Quit"];
+                let labels = ["Maybe try again?", "Main Menu"];
 
                 for (i, label) in labels.iter().enumerate() {
                     let style = if self.selected_button == i {

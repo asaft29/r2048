@@ -21,9 +21,10 @@ pub mod decoration {
 }
 pub mod game_logic {
     use rand::seq::IteratorRandom;
-
+    use std::cell::Cell;
     pub struct Board {
         pub size: [[u32; 4]; 4],
+        pub high_score: Cell<u32>,
     }
 
     pub enum State {
@@ -35,7 +36,10 @@ pub mod game_logic {
 
     impl Board {
         pub fn new() -> Self {
-            Self { size: [[0; 4]; 4] }
+            Self {
+                size: [[0; 4]; 4],
+                high_score: Cell::new(0),
+            }
         }
 
         pub fn clear(&mut self) {
@@ -228,7 +232,9 @@ pub mod game_logic {
         }
 
         pub fn calculate_score(&self) -> u32 {
-            self.size.iter().flatten().sum()
+            let val: u32 = self.size.iter().flatten().sum();
+            self.high_score.set(val);
+            val
         }
     }
 }

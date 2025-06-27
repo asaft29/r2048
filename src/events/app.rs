@@ -179,7 +179,7 @@ impl App {
                         self.board.init_board();
                     }
 
-                    1 => self.events.send(AppEvent::Quit),
+                    1 => self.state = State::Menu,
 
                     _ => {}
                 },
@@ -211,7 +211,7 @@ impl App {
                         self.board.init_board();
                     }
 
-                    1 => self.events.send(AppEvent::Quit),
+                    1 => self.state = State::Menu,
 
                     _ => {}
                 },

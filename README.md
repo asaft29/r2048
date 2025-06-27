@@ -78,8 +78,8 @@ git clone https://github.com/asaft29/r2048.git
 
 cd r2048
 
-# Run it immediately (Cargo will handle the build)
-cargo run --release
+# Run it immediately with no verbose output showing (Cargo will handle the build)
+cargo run --release --quiet
 ```
 
 ### System Requirements
