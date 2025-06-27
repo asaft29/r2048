@@ -233,7 +233,9 @@ pub mod game_logic {
 
         pub fn calculate_score(&self) -> u32 {
             let val: u32 = self.size.iter().flatten().sum();
-            self.high_score.set(val);
+            if val > self.high_score.get() {
+                self.high_score.set(val);
+            }
             val
         }
     }
