@@ -96,7 +96,6 @@ cargo run --release --quiet
 Some ideas I'm considering for future versions:
 - **Undo functionality** (because we all make mistakes)
 - **Different board sizes** (n×n is the plan)
-- **High score tracking** (with proper persistence)
 
 ---
 

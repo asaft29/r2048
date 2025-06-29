@@ -140,8 +140,9 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
+                            let font_path = format!("{}/src/tui/fonts/Graceful.flf", env!("CARGO_MANIFEST_DIR"));
                             let standard_font =
-                                FIGfont::from_file("src/tui/fonts/Graceful.flf").unwrap();
+                                FIGfont::from_file(&font_path).unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
