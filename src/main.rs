@@ -1,5 +1,10 @@
-mod events;
-mod tui;
+mod events {
+    pub mod app;
+    pub mod event;
+}
+mod tui {
+    pub mod ui;
+}
 use events::app::App;
 
 fn main() -> color_eyre::Result<()> {

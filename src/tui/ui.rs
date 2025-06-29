@@ -141,7 +141,7 @@ impl Widget for &App {
 
                         if value != 0 {
                             let standard_font =
-                                FIGfont::from_file("src/fonts/Graceful.flf").unwrap();
+                                FIGfont::from_file("src/tui/fonts/Graceful.flf").unwrap();
                             let figure = standard_font.convert(&value.to_string()).unwrap();
 
                             let ascii_lines: Vec<Line> = figure
