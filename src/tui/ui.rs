@@ -1,5 +1,4 @@
 use crate::events::app::App;
-use figlet_rs::FIGfont;
 use r2048::game_logic::State;
 use ratatui::{
     buffer::Buffer,
@@ -10,6 +9,7 @@ use ratatui::{
     widgets::*,
     widgets::{Block, BorderType, Paragraph, Widget},
 };
+use tui_big_text::{BigText, PixelSize};
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -140,53 +140,25 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            let font_path = format!("{}/src/tui/fonts/Graceful.flf", env!("CARGO_MANIFEST_DIR"));
-                            let standard_font =
-                                FIGfont::from_file(&font_path).unwrap();
-                            let figure = standard_font.convert(&value.to_string()).unwrap();
-
-                            let ascii_lines: Vec<Line> = figure
-                                .to_string()
-                                .lines()
-                                .map(|line| {
-                                    Line::from(Span::styled(
-                                        line.to_string(),
-                                        Style::default()
-                                            .add_modifier(Modifier::BOLD)
-                                            .fg(Color::Black),
-                                    ))
+                            
+                            let big_text = BigText::builder()
+                                .centered()
+                                .pixel_size(PixelSize::Full)
+                                .style(match value {
+                                    2 | 4 => Style::new().blue(),
+                                    _ => Style::new().black().bold(),
                                 })
-                                .collect();
+                                .lines(vec![Line::from(value.to_string())])
+                                .build();
 
-                            let content_height = ascii_lines.len() as u16;
-                            let inner_height = cell_area.height.saturating_sub(2);
-                            let top_padding = if inner_height > content_height {
-                                (inner_height - content_height) / 2
-                            } else {
-                                0
+                            let text_area = Rect {
+                                x: cell_area.x + 1,
+                                y: cell_area.y + 1,
+                                width: cell_area.width.saturating_sub(2),
+                                height: cell_area.height.saturating_sub(2),
                             };
 
-                            let mut padded_content = Vec::new();
-                            for _ in 0..top_padding {
-                                padded_content.push(Line::from(""));
-                            }
-                            padded_content.extend(ascii_lines);
-                            while padded_content.len() < inner_height as usize {
-                                padded_content.push(Line::from(""));
-                            }
-
-                            Paragraph::new(padded_content)
-                                .alignment(Alignment::Center)
-                                .style(Style::default().bg(bg_color))
-                                .render(
-                                    Rect {
-                                        x: cell_area.x + 1,
-                                        y: cell_area.y + 1,
-                                        width: cell_area.width.saturating_sub(2),
-                                        height: cell_area.height.saturating_sub(2),
-                                    },
-                                    buf,
-                                );
+                            big_text.render(text_area, buf);
                         }
                     }
                 }
