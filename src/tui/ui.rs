@@ -95,39 +95,27 @@ impl Widget for &App {
                     .borders(Borders::ALL)
                     .style(Style::default().bg(Color::Black))
                     .title_alignment(Alignment::Center);
-
                 let inner_area = game_block.inner(area);
                 game_block.render(area, buf);
 
                 let cell_width = inner_area.width / 4;
                 let cell_height = inner_area.height / 4;
 
+                let grid_width = cell_width * 4;
+                let grid_height = cell_height * 4;
+                let grid_start_x = inner_area.x + (inner_area.width - grid_width) / 2;
+                let grid_start_y = inner_area.y + (inner_area.height - grid_height) / 2;
+
                 for row in 0..4 {
                     for col in 0..4 {
-                        let width = if col == 3 {
-                            inner_area.width - cell_width * 3
-                        } else {
-                            cell_width
-                        };
-
-                        let height = if row == 3 {
-                            inner_area.height - cell_height * 3
-                        } else {
-                            cell_height
-                        };
-
-                        let x = inner_area.x + col * cell_width;
-                        let y = inner_area.y + row * cell_height;
-
                         let cell_area = Rect {
-                            x,
-                            y,
-                            width,
-                            height,
+                            x: grid_start_x + col * cell_width,
+                            y: grid_start_y + row * cell_height,
+                            width: cell_width,
+                            height: cell_height,
                         };
 
                         let value = self.board.size[row as usize][col as usize];
-
                         let bg_color = if value != 0 {
                             r2048::decoration::get_background_color(value)
                         } else {
@@ -140,10 +128,15 @@ impl Widget for &App {
                             .render(cell_area, buf);
 
                         if value != 0 {
-                            
+                            let pixel_size = if cell_area.width < 8 || cell_area.height < 4 {
+                                PixelSize::Quadrant
+                            } else {
+                                PixelSize::Full
+                            };
+
                             let big_text = BigText::builder()
                                 .centered()
-                                .pixel_size(PixelSize::Full)
+                                .pixel_size(pixel_size)
                                 .style(match value {
                                     2 | 4 => Style::new().blue(),
                                     _ => Style::new().black().bold(),
