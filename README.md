@@ -13,11 +13,11 @@ This isn't just another 2048 clone – it's a love letter to both the classic ga
 ## See It For Yourself
 
 <p align="center">
-  <img src="doc/playing.png" alt="Menu screen" width="500"><br>
+  <img src="doc/menu.png" alt="Menu screen" width="500"><br>
   <em>This is what you are greeted with on the main menu</em>
 </p>
 <p align="center">
-  <img src="doc/vscode.png" alt="Mid-game action with colorful tiles" width="500"><br>
+  <img src="doc/playing.png" alt="Mid-game action with colorful tiles" width="500"><br>
   <em>The heat of battle – every move counts when you're this close to 2048</em>
 </p>
 <p align="center">
