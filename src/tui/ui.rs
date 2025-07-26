@@ -1,5 +1,5 @@
 use crate::events::app::App;
-use r2048::game_logic::State;
+use crate::game_logic::State;
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -58,10 +58,12 @@ impl Widget for &App {
                     .alignment(ratatui::layout::Alignment::Center);
                 title.render(inner_chunks[0], buf);
 
-                let highest_score_paragraph =
-                    Paragraph::new(format!("Highest Score: {}", self.board.high_score.get()))
-                        .style(Style::default().fg(Color::Yellow))
-                        .alignment(ratatui::layout::Alignment::Center);
+                let highest_score_paragraph = Paragraph::new(format!(
+                    "Highest Score: {}",
+                    self.board.db.borrow().get_score().unwrap()
+                ))
+                .style(Style::default().fg(Color::Yellow))
+                .alignment(ratatui::layout::Alignment::Center);
                 highest_score_paragraph.render(inner_chunks[1], buf);
 
                 let button_chunks = Layout::default()
@@ -117,7 +119,7 @@ impl Widget for &App {
 
                         let value = self.board.size[row as usize][col as usize];
                         let bg_color = if value != 0 {
-                            r2048::decoration::get_background_color(value)
+                            crate::decoration::get_background_color(value)
                         } else {
                             Color::Black
                         };
@@ -192,7 +194,13 @@ impl Widget for &App {
                     .border_type(ratatui::widgets::BorderType::Double)
                     .title_alignment(Alignment::Center);
 
-                let score_value = self.board.calculate_score().to_string();
+                let score_value = self.board.calculate_score();
+                self.board
+                    .db
+                    .borrow_mut()
+                    .update_score(score_value)
+                    .unwrap();
+
                 let lines = vec![
                     Line::styled(
                         "You got 2048 on the board",
@@ -203,7 +211,7 @@ impl Widget for &App {
                     Line::from(vec![
                         Span::styled("SCORE : ", Style::default().fg(Color::White)),
                         Span::styled(
-                            score_value,
+                            score_value.to_string(),
                             Style::default()
                                 .fg(Color::LightMagenta)
                                 .add_modifier(Modifier::BOLD),
@@ -279,7 +287,13 @@ impl Widget for &App {
                     .border_type(ratatui::widgets::BorderType::Double)
                     .title_alignment(Alignment::Center);
 
-                let score_value = self.board.calculate_score().to_string();
+                let score_value = self.board.calculate_score();
+                self.board
+                    .db
+                    .borrow_mut()
+                    .update_score(score_value)
+                    .unwrap();
+
                 let lines = vec![
                     Line::styled(
                         "No more possible moves, you were so close!",
@@ -288,7 +302,7 @@ impl Widget for &App {
                     Line::from(vec![
                         Span::styled("SCORE : ", Style::default().fg(Color::White)),
                         Span::styled(
-                            score_value,
+                            score_value.to_string(),
                             Style::default()
                                 .fg(Color::LightMagenta)
                                 .add_modifier(Modifier::BOLD),

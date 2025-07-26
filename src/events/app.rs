@@ -1,13 +1,11 @@
 use crate::events::event::{AppEvent, Event, EventHandler};
-
+use crate::game_logic::*;
 use crossterm::event::KeyEventKind;
 
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
 };
-
-use r2048::game_logic::*;
 
 /// Application.
 

@@ -1,3 +1,13 @@
+pub mod events {
+    pub mod app;
+    pub mod event;
+}
+pub mod tui {
+    pub mod ui;
+}
+
+pub mod db;
+
 pub mod decoration {
 
     use ratatui::style::Color;
@@ -19,12 +29,15 @@ pub mod decoration {
         }
     }
 }
-pub mod game_logic {
+pub(crate) mod game_logic {
+    use crate::db::{self};
     use rand::seq::IteratorRandom;
-    use std::cell::Cell;
+    use std::cell::RefCell;
+
+    #[derive(Debug)]
     pub struct Board {
         pub size: [[u32; 4]; 4],
-        pub high_score: Cell<u32>,
+        pub db: RefCell<db::Score>,
     }
 
     pub enum State {
@@ -38,7 +51,7 @@ pub mod game_logic {
         pub fn new() -> Self {
             Self {
                 size: [[0; 4]; 4],
-                high_score: Cell::new(0),
+                db: RefCell::new(db::Score::new().unwrap()),
             }
         }
 
@@ -233,8 +246,8 @@ pub mod game_logic {
 
         pub fn calculate_score(&self) -> u32 {
             let val: u32 = self.size.iter().flatten().sum();
-            if val > self.high_score.get() {
-                self.high_score.set(val);
+            if val > self.db.borrow().get_score().unwrap() {
+                self.db.borrow_mut().update_score(val).unwrap()
             }
             val
         }
