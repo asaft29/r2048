@@ -105,20 +105,3 @@ Found a bug? Have a cool feature idea? Want to improve the colors? Pull requests
 
 Whether you're a Rust expert or another beginner like me, I'd love to see what improvements you can bring to the table.
 
----
-
-## Bibliography & Credits
-
-<p align="center">
-
-- <b>Figlet Fonts</b>  
-Fonts used in ASCII art are from the collection by <a href="https://github.com/xero" target="_blank">xero</a>  
-<br>
-
-- <b>Ratatui</b>  
-Built with the powerful terminal UI library <a href="https://ratatui.rs/" target="_blank">ratatui.rs</a>  
-</p>
-
---- 
-
-
