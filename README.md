@@ -45,7 +45,17 @@ This isn't just another 2048 clone – it's a love letter to both the classic ga
 
 ---
 
-### Thoughts On The Project
+## Score Persistence 
+
+High scores now persist between sessions thanks to a built-in [SQLite](https://docs.rs/rusqlite/latest/rusqlite/) database.
+
+Whether you quit the game, close your terminal, or reboot your machine, your top scores are safely stored — no setup required.
+
+Each user has a separate score history, so you can challenge friends on the same machine without stepping on each other’s records. It’s simple, fast, and completely local.
+
+---
+
+## Thoughts On The Project
 
 **Coming from C++**: I have some background in C++, so I wasn't a stranger to manual memory management and low-level thinking. That said, Rust still made me rethink how I structure code. The compiler was strict — but fair — and once I started to **work with** the borrow checker instead of around it, everything became more intuitive.
 
@@ -59,7 +69,7 @@ This isn't just another 2048 clone – it's a love letter to both the classic ga
 
 ---
 
-### Technical Decisions
+## Technical Decisions
 
 - **Why Rust?** Rust combines performance with safety. It gave me C++-like control without the footguns. Pattern matching and enums made the game logic more expressive and less error-prone.
   
