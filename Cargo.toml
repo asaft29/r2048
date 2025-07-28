@@ -17,4 +17,4 @@ ratatui = "0.29.0"
 color-eyre = "0.6.3"
 rand = "0.9.1"
 tui-big-text = "0.7.1"
-rusqlite = "0.37.0"
+rusqlite = { version = "0.37.0", features = ["bundled"] }
