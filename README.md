@@ -1,5 +1,7 @@
 # r2048
-
+[![Linux Build](https://github.com/asaft29/r2048/actions/workflows/linux.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/linux.yml)
+[![macOS Build](https://github.com/asaft29/r2048/actions/workflows/macos.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/macos.yml)
+[![Windows Build](https://github.com/asaft29/r2048/actions/workflows/windows.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/windows.yml)
 <p align="center">
   <img src="doc/demo.gif" alt="r2048 Demo" width="600">
 </p>
