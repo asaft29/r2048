@@ -1,5 +1,5 @@
+use crate::board::State;
 use crate::events::app::App;
-use crate::game_logic::State;
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},

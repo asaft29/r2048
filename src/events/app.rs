@@ -1,5 +1,5 @@
+use crate::board::*;
 use crate::events::event::{AppEvent, Event, EventHandler};
-use crate::game_logic::*;
 use crossterm::event::KeyEventKind;
 
 use ratatui::{
