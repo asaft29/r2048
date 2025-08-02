@@ -20,6 +20,7 @@ impl Score {
         Ok(Self { conn })
     }
 
+    #[inline(always)]
     pub fn update_score(&self, new_score: u32) -> Result<()> {
         let current_high: u32 = self
             .conn
@@ -37,6 +38,7 @@ impl Score {
         Ok(())
     }
 
+    #[inline(always)]
     pub fn get_score(&self) -> Result<u32> {
         let score = self
             .conn

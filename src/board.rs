@@ -8,7 +8,6 @@ pub enum State {
     Lost,
     Won,
 }
-
 pub trait Move {
     fn move_all_down(&mut self);
     fn move_all_up(&mut self);
@@ -30,6 +29,7 @@ impl Board {
         }
     }
 
+    #[inline(always)]
     pub fn clear(&mut self) {
         self.size
             .iter_mut()
@@ -67,6 +67,7 @@ impl Board {
             self.size[row][col] = value;
         }
     }
+    #[inline(always)]
     pub fn won(&self) -> bool {
         self.size.iter().flatten().any(|&x| x == 2048)
     }
@@ -92,7 +93,7 @@ impl Board {
 
         true
     }
-
+    #[inline(always)]
     pub fn calculate_score(&self) -> u32 {
         let val: u32 = self.size.iter().flatten().sum();
         if val > self.db.borrow().get_score().unwrap() {
@@ -105,6 +106,7 @@ impl Board {
 impl Move for Board {
     fn move_all_down(&mut self) {
         for i in 0..self.size.len() {
+            let mut merged = [false; 4];
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = 0;
             while j < self.size[0].len() {
@@ -123,9 +125,10 @@ impl Move for Board {
                             index += 1;
                         }
 
-                        other if other == val => {
+                        other if other == val && !merged[index + 1] => {
                             self.size[index + 1][i] += other;
                             self.size[index][i] = 0;
+                            merged[index + 1] = true;
                             break;
                         }
 
@@ -138,6 +141,7 @@ impl Move for Board {
 
     fn move_all_up(&mut self) {
         for i in 0..self.size.len() {
+            let mut merged = [false; 4];
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = self.size[0].len() - 1;
             while j > 0 {
@@ -155,9 +159,10 @@ impl Move for Board {
                             index -= 1;
                         }
 
-                        other if other == val => {
+                        other if other == val && !merged[index - 1] => {
                             self.size[index - 1][i] += other;
                             self.size[index][i] = 0;
+                            merged[index - 1] = true;
                             break;
                         }
 
@@ -169,6 +174,7 @@ impl Move for Board {
     }
     fn move_all_right(&mut self) {
         for i in 0..self.size.len() {
+            let mut merged = [false; 4];
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = 0;
             while j < self.size[0].len() {
@@ -186,9 +192,10 @@ impl Move for Board {
                             self.size[i][index] = 0;
                             index += 1;
                         }
-                        other if other == val => {
+                        other if other == val && !merged[index + 1] => {
                             self.size[i][index + 1] += other;
                             self.size[i][index] = 0;
+                            merged[index + 1] = true;
                             break;
                         }
 
@@ -201,6 +208,7 @@ impl Move for Board {
 
     fn move_all_left(&mut self) {
         for i in 0..self.size.len() {
+            let mut merged = [false; 4];
             let mut stack: Vec<(u32, usize)> = Vec::new();
             let mut j = self.size[0].len() - 1;
             while j > 0 {
@@ -218,9 +226,10 @@ impl Move for Board {
                             self.size[i][index] = 0;
                             index -= 1;
                         }
-                        other if other == val => {
+                        other if other == val && !merged[index - 1] => {
                             self.size[i][index - 1] += other;
                             self.size[i][index] = 0;
+                            merged[index - 1] = true;
                             break;
                         }
 
