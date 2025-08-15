@@ -109,11 +109,3 @@ Some ideas I'm considering for future versions:
 - **Undo functionality** (because we all make mistakes)
 - **Different board sizes** (n×n is the plan)
 
----
-
-## Contributing
-
-Found a bug? Have a cool feature idea? Want to improve the colors? Pull requests are welcome! This project is as much about learning Rust and terminal UI development as it is about the game itself.
-
-Whether you're a Rust expert or another beginner like me, I'd love to see what improvements you can bring to the table.
-
