@@ -1,11 +1,25 @@
 [package]
 name = "r2048"
-version = "0.1.0"
+version = "0.1.1"
 description = "2048 written in rust"
 authors = ["Rares-Stefan Asaftei <rasaft29@gmail.com>"]
 license = "MIT"
 edition = "2024"
 repository = "https://github.com/asaft29/r2048"
+readme = "README.md"
+
+exclude = [
+    "target/*",
+    ".cargo_vcs_info.json",
+    ".github/*",
+    ".gitignore",
+    "CONTRIBUTING.md",
+    "Cargo.toml.orig",
+    "doc/game_over_old.png",
+    "doc/menu_old.png",
+    "doc/playing_old.png",
+    "doc/winning_old.png",
+]
 
 [lib]
 name = "r2048"

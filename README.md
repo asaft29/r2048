@@ -2,36 +2,35 @@
 [![Linux Build](https://github.com/asaft29/r2048/actions/workflows/linux.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/linux.yml)
 [![macOS Build](https://github.com/asaft29/r2048/actions/workflows/macos.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/macos.yml)
 [![Windows Build](https://github.com/asaft29/r2048/actions/workflows/windows.yml/badge.svg)](https://github.com/asaft29/r2048/actions/workflows/windows.yml)
+[![Crates.io](https://img.shields.io/crates/v/r2048.svg)](https://crates.io/crates/r2048)
 <p align="center">
-  <img src="doc/demo.gif" alt="r2048 Demo" width="600">
+  <img src="doc/demo.gif" alt="r2048 Demo" width="600"><br><br>
+  r2048 is a terminal version of the classic 2048 game, built in Rust using the <a href="https://github.com/ratatui-org/ratatui">ratatui</a> crate for the UI design.
 </p>
 
-Ever found yourself mindlessly sliding tiles on your phone during a boring meeting? Well, now you can do it in your terminal like a true developer! **r2048** is my take on the addictive number-sliding puzzle game, rebuilt from scratch in Rust with a beautiful TUI.
 
-This isn't just another 2048 clone – it's a love letter to both the classic game and the terminal. Built with Rust's blazing-fast performance and the elegant [`ratatui`](https://github.com/ratatui-org/ratatui) library, it delivers that satisfying slide-and-merge gameplay with colors so crisp you'll forget you're in a terminal.
 
----
-
-## See It For Yourself
+## Preview
+<br>
 
 <p align="center">
   <img src="doc/menu.png" alt="Menu screen" width="500"><br>
-  <em>This is what you are greeted with on the main menu</em>
+  <strong>Menu</strong>
 </p>
 <p align="center">
   <img src="doc/playing.png" alt="Mid-game action with colorful tiles" width="500"><br>
-  <em>The heat of battle – every move counts when you're this close to 2048</em>
+  <strong>Mid-game</strong>
 </p>
 <p align="center">
   <img src="doc/winning.png" alt="Victory screen celebration" width="500"><br>
-  <em>Sweet victory! That 2048 tile never gets old</em>
+ ʕ·͡ᴥ·ʔ﻿ <strong>Winning</strong> ʕ·͡ᴥ·ʔ﻿
 </p>
 <p align="center">
   <img src="doc/game_over.png" alt="Game over screen" width="500"><br>
-  <em>Sometimes the numbers just don't align. Time to try again!</em>
+  ಡ_ಡ <strong>Losing</strong> ಡ_ಡ
 </p>
 
----
+<br>
 
 ## Controls That Just Make Sense
 
@@ -45,7 +44,7 @@ This isn't just another 2048 clone – it's a love letter to both the classic ga
 - `Q` or `Esc` – Takes you back to the menu when things get tough
 - `Ctrl + C` – Nuclear option (closes everything immediately)
 
----
+<br>
 
 ## Score Persistence 
 
@@ -55,32 +54,32 @@ Whether you quit the game, close your terminal, or reboot your machine, your top
 
 Each user has a separate score history, so you can challenge friends on the same machine without stepping on each other’s records. It’s simple, fast, and completely local.
 
----
+<br>
 
-## Thoughts On The Project
+## Development Notes
 
-**Coming from C++**: I have some background in C++, so I wasn't a stranger to manual memory management and low-level thinking. That said, Rust still made me rethink how I structure code. The compiler was strict — but fair — and once I started to **work with** the borrow checker instead of around it, everything became more intuitive.
+- **C++ Background:** Coming from C++, Rust’s borrow checker encouraged cleaner, safer code structure.  
 
-**Fighting the Borrow Checker**: Like most Rust beginners, I had a few battles with ownership and lifetimes. But once I grasped the model, it actually helped me reason more clearly about game state transitions and data flow. Rust really rewards disciplined design.
+- **State Machine:** Using enums and pattern matching, the game’s states (`Menu`, `Playing`, `Won`, `GameOver`) are clear and type-safe.  
 
-**State Management**: Thanks to Rust’s enums and pattern matching, implementing a robust state machine felt natural. Each state (`Menu`, `Playing`, `Won`, `GameOver`) had clearly defined responsibilities, and the compiler helped enforce separation between them. I didn’t just write logic — I encoded game rules into the type system.
+- **Game Logic:** Implementing merge rules correctly without double merges was the trickiest part — it took several rewrites to get right.  
+ker encouraged 
+- **Code Quality:** Rust’s strictness helped catch subtle edge cases and improved overall code reliability.
 
-**Game Logic Challenges**: On paper, 2048 seems straightforward. But implementing merge rules correctly (especially avoiding double merges) and tracking win/loss conditions taught me a lot about edge cases. I rewrote the move algorithm multiple times before it felt solid.
-
-**Terminal Magic**: Using [`ratatui`](https://github.com/ratatui-org/ratatui) showed me that terminal UIs can be surprisingly expressive. With smooth rendering and full color support, the game feels lively — even in a text-based environment.
-
----
-
-## Technical Decisions
-
-- **Why Rust?** Rust combines performance with safety. It gave me C++-like control without the footguns. Pattern matching and enums made the game logic more expressive and less error-prone.
-  
-- **Why Terminal?** Terminal games are pure, portable, and nostalgic. No rendering engines or window managers to worry about — just text and logic. It also made the game extremely lightweight and fast to run.
-
-- **Why Ratatui?** [`ratatui`](https://github.com/ratatui-org/ratatui) gave me full control over layout, styling, and drawing while remaining easy to use. It supports Unicode, colors, and composable layouts — everything I needed for a clean grid-based game like 2048.
-
+<br>
 
 ## Getting Started
+
+### 1. Via [crates.io](https://crates.io/crates/r2048):
+If Rust is installed and you don't want to clone the repo, consider using `cargo install`
+```bash
+cargo install r2048
+
+r2048
+```
+> Note: Running the game this way will create a SQLite database in the folder where r2048 is executed to store high scores
+
+### 2. Build it yourself
 
 First, make sure you have Rust installed on your system. If not, grab it from [rust-lang.org](https://www.rust-lang.org/tools/install) – it's surprisingly painless.
 
@@ -93,19 +92,3 @@ cd r2048
 # Run it immediately with no verbose output showing (Cargo will handle the build)
 cargo run --release 
 ```
-
-### System Requirements
-
-- Any terminal with Unicode support (so basically any terminal from the last decade)
-- Rust 1.70+ (for the latest `ratatui` features)
-- About 2MB of disk space
-- A burning desire to reach 2048
-
----
-
-## What's Next?
-
-Some ideas I'm considering for future versions:
-- **Undo functionality** (because we all make mistakes)
-- **Different board sizes** (n×n is the plan)
-
