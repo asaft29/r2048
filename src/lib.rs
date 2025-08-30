@@ -12,7 +12,7 @@ pub mod db;
 pub mod decoration {
 
     use ratatui::style::Color;
-    
+
     #[inline(always)]
     pub fn get_background_color(value: u32) -> Color {
         match value {
