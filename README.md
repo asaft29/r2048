@@ -77,7 +77,6 @@ cargo install r2048
 
 r2048
 ```
-> Note: Running the game this way will create a SQLite database in the folder where r2048 is executed to store high scores
 
 ### 2. Build it yourself
 
@@ -92,3 +91,10 @@ cd r2048
 # Run it immediately with no verbose output showing (Cargo will handle the build)
 cargo run --release 
 ```
+
+### Warning
+
+> There are some potential issues with `cargo install` if you are on **Windows**  
+
+- `stdarg.h` missing → install C++ build tools + Windows SDK  
+- `libsqlite3-sys` fails → MSVC headers required

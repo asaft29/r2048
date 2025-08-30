@@ -1,3 +1,6 @@
+use std::fs;
+use std::path::PathBuf;
+
 use rusqlite::{Connection, Result, params};
 
 #[derive(Debug)]
@@ -7,8 +10,14 @@ pub struct Score {
 
 impl Score {
     pub fn new() -> Result<Self> {
-        let conn = Connection::open("r2048.db")?;
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push("src/db/r2048.db");
 
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).expect("Failed to create dir");
+        }
+
+        let conn = Connection::open(path)?;
         conn.execute(
             "CREATE TABLE IF NOT EXISTS data (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
