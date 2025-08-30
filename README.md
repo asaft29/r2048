@@ -92,3 +92,7 @@ cd r2048
 # Run it immediately with no verbose output showing (Cargo will handle the build)
 cargo run --release 
 ```
+
+### Warning
+
+> There are some issues with `cargo install` if you are on **Windows**
