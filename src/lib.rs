@@ -13,8 +13,7 @@ pub mod decoration {
 
     use ratatui::style::Color;
 
-    #[inline(always)]
-    pub fn get_background_color(value: u32) -> Color {
+    pub const fn get_background_color(value: u32) -> Color {
         match value {
             2 => Color::Rgb(238, 228, 218),   // #eee4da
             4 => Color::Rgb(237, 224, 180),   // #ede0b4
